@@ -7,7 +7,7 @@
 
 > ### Cite
 > ```bibtex
-> @article{
+> @article{paredes2026,
 >   title={ High-Dimensional Decentralized Causal Process Monitoring: Part I - the Impact of Network Topology on Fault Detection Sensitivity },
 >   author={ Rodrigo Paredes , Wei-Ting Yang , Marco S. Reis},
 >   journal={Submitted for },
@@ -44,7 +44,7 @@ Measurement noise can be added to all variables according to a user-defined sign
 
 ### 3. Faulty Data Generation
 SimCaNet supports the injection of structurally consistent anomalies directly into the SCM mathematical equations at specified magnitudes ($k$):
-1. **Process Perturbations:** A step change is applied to a root variable: ($\mu_i = \mu_i + k \cdot \sigma_i$). The disturbance propagates naturally through the causal network and affects downstream variables
+1. **Process Perturbations:** A step change is applied to a root variable ($\mu_i = \mu_i + k \cdot \sigma_i$). The disturbance propagates naturally through the causal network and affects downstream variables
 2. **Sensor Biases:** A bias is added only to the measured value of a variable: ($X_i = X_i + k \cdot \sigma_{\text{noise}}$). The underlying process remains unchanged
 3. **Correlation Changes:** A structural change is introduced by modifying a causal coefficient according to the fault magnitude: $$\beta_{ji}^{fault} = \beta_{ji}\left(1+\frac{k}{100}\right)$$, where $k$ denotes the fault magnitude expressed as a percentage. This simulates changes in the strength of the causal relationship between two connected variables while preserving the underlying network topology.
 
