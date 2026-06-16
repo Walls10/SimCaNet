@@ -34,7 +34,9 @@ def convert_to_igraph(g):
     
 def plot_disjoint_communities_igraph(graph, partition, ax=None):
 
-    """ARGS:
+    """Convert a NetworkX graph into an igraph graph object.
+    
+    ARGS:
     graph (igraph) - graph
     partition - list of lists
     """
@@ -42,6 +44,9 @@ def plot_disjoint_communities_igraph(graph, partition, ax=None):
     layout=graph.layout('fr')
     if ax is None:
         fig, ax = plt.subplots(figsize=(15, 15))
+        is_standalone = True
+    else:
+        is_standalone = False
     
     # Communities colors
     colors = ['red', 'lightblue', 'green', 'blue', 'mediumvioletred', 'orange', 'white']
@@ -56,16 +61,21 @@ def plot_disjoint_communities_igraph(graph, partition, ax=None):
     labels = ['Root-nodes', 'Non root-nodes']
     legend_handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=10, label=label) for color, label in zip(colors, labels)]
     ax.legend(handles=legend_handles, loc='upper left')
-    plt.show() 
+    
+    if is_standalone:
+        plt.show()
 
 ##-------------- Graph Generation or Importation from a pickle file ----------------##
 
 def graph_generation_or_importation(number_of_nodes, 
                                     degree_mean=1, 
                                     execute_graph=True, 
-                                    file_name=None):
+                                    file_name=None, 
+                                    ax = None):
     
-    """ ARGS:
+    """Generate a random directed Barabasi graph or import an existing NetworkX graph from a pickle file.
+    
+    ARGS:
 
     number_of_nodes - number of the nodes in the network
     degree_mean - The mean of the degree of the nodes
@@ -95,7 +105,7 @@ def graph_generation_or_importation(number_of_nodes,
 
         partition = [root_nodes_b, non_root_nodes_b]
 
-        plot_disjoint_communities_igraph(g,partition)
+        plot_disjoint_communities_igraph(g, partition, ax = ax)
         g1 = g.to_networkx()
         g2 = nx.relabel_nodes(g1, {old_node: new_node for old_node, new_node in zip(g1.nodes, nodes)})
         return g2 , nodes
@@ -121,16 +131,26 @@ def graph_generation_or_importation(number_of_nodes,
 
         partition = [root_nodes, non_root_nodes]
         
-        plot_disjoint_communities_igraph(barabasi1,partition)
+        plot_disjoint_communities_igraph(barabasi1, partition, ax = ax)
         g11 = nx.relabel_nodes(barabasi, {old_node: new_node for old_node, new_node in zip(barabasi.nodes, nodes)})
         return g11, nodes
     
 ##-------------- Graph Analysis ----------------##
 
 def has_edge(G, u, v):
+    """Check if an edge exists between two nodes in either direction."""
     return G.has_edge(u, v) or G.has_edge(v, u)
 
 def classify_triplets(G):
+    """Find and classify all node triplets in the graph into closed triangles and open triplets.
+
+    ARGS:
+    G (graph) - networkx graph
+
+    OUTPUTS:
+    closed_triangles - list of tuples, each containing 3 mutually connected nodes
+    open_triplets - list of tuples, each containing 3 nodes with exactly 2 edges between them
+    """
     closed_triangles = []
     open_triplets = []
     nodes = list(G.nodes())
@@ -153,7 +173,15 @@ def classify_triplets(G):
 
 def graph_analysis(g):
 
-    """Function to analyze the used graph. g is a networkx graph"""
+    """Analyze a graph and print key structural metrics.
+
+    Calculates and prints fundamental graph statistics including the counts of 
+    nodes, edges, root nodes, non-root nodes, sinks, open/closed triplets, 
+    graph density, and whether the network qualifies as a Directed Acyclic Graph (DAG).
+
+    ARGS:
+    g (graph) - networkx graph to be analyzed
+    """
 
     sinks = []
     for node in g.nodes:
@@ -189,7 +217,9 @@ def graph_analysis(g):
 ##-------------- Get Parameters for the Equation System ----------------##
 
 def get_params(g, nodes, process_fault=0, freedom_degree=3,faulty_node=None,view_equation=True):
-    """ARGS: 
+    """Generate parameters for a Structural Causal Model (SCM) based on a causal graph.
+    
+    ARGS: 
     g - generated graph (networkx)
     nodes -list with the name of the variables
     freedom_degree- freedom degree of t distribution to bij (coefs)
@@ -236,7 +266,9 @@ def get_params(g, nodes, process_fault=0, freedom_degree=3,faulty_node=None,view
 ##-------------- Perform a Correlation Fault ----------------##
 
 def correlation_fault(non_root_coefs, g, k=0, affect_edge=None):
-    """ARGS: 
+    """Inject a correlation fault into specific graph edges by scaling their causal coefficients.
+    
+    ARGS: 
     non_root_coefs - coefficients (dic)
     g - generated graph (networkx)
     k -  percentage factor, if k = 0 there isn't fault (float) 
@@ -272,7 +304,9 @@ def correlation_fault(non_root_coefs, g, k=0, affect_edge=None):
 ##-------------- Data Generation ----------------##
 
 def generate_data(num_observations, g, params, nonroot_coefs, intercept):
-    """ARGS: 
+    """Simulate dataset observations from a Structural Causal Model (SCM) using topological sorting.
+    
+    ARGS: 
     num_observations - number of observations
     g - networkx graph
     params(dic) - Distribution Parameters of root nodes (mean, var)
@@ -348,7 +382,9 @@ def add_measurement_noise(data, nodes, snr_db,sensor_fault=0,faulty_nodes=None):
 
 def save_datasets_cal_val(g,nodes,filename,num_observations=1000):
     
-    """ARGS: 
+    """Apply Gaussian measurement noise to simulated data based on a target Signal-to-Noise Ratio (SNR) and inject sensor bias faults.
+    
+    ARGS: 
     g (graph) - causal graph (networkx)
     nodes = list of the label nodes
     filename (str) - name for the file ex. 'insert_name.csv'
